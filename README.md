@@ -26,6 +26,7 @@ High-quality music generation models for creating music from scratch or continui
 
 ## ✨ Features
 
+- ✅ **100% Parity Verified** - VQ-VAE features identical to original Jukebox (see [Parity Verification](docs/PARITY_VERIFICATION.md))
 - ✅ **Inference-only** - No training code, significantly reduced codebase (~47% reduction)
 - ✅ **Modern PyTorch** - Compatible with PyTorch 2.7+
 - ✅ **Single-GPU** - No MPI or distributed dependencies
@@ -49,7 +50,13 @@ pip install jukebox-infer
 
 # Using UV (recommended for development)
 uv pip install jukebox-infer
+
+# For development/comparison with original Jukebox
+cd jukebox-infer
+pip install -e .  # Must run from inside jukebox-infer/ directory
 ```
+
+> **Note:** If you're setting up both the original Jukebox and jukebox-infer for comparison testing, see [../JUKEBOX_SETUP.md](../JUKEBOX_SETUP.md) for detailed environment setup instructions.
 
 ### Command-Line Interface (Fastest)
 
@@ -168,6 +175,7 @@ This matches the original implementation's performance characteristics.
 
 ## 📚 Documentation
 
+- **[PARITY_VERIFICATION.md](docs/PARITY_VERIFICATION.md)** - ✅ **100% parity verification** with original Jukebox
 - **[CHECKPOINT_ARCHITECTURE.md](docs/CHECKPOINT_ARCHITECTURE.md)** - Details on checkpoint structure and sharing between models
 - **[Development Guidelines](docs/dev/PRINCIPLES.md)** - Development principles, code style, and contribution guidelines
 
@@ -187,6 +195,7 @@ jukebox-infer/
 │   ├── transformer/   # Transformer architecture
 │   └── data/         # Data processing utilities
 ├── docs/              # Documentation
+│   ├── PARITY_VERIFICATION.md      # ✅ 100% parity proof
 │   ├── CHECKPOINT_ARCHITECTURE.md
 │   └── dev/           # Development guidelines
 │       └── PRINCIPLES.md
@@ -199,6 +208,39 @@ jukebox-infer/
 ```
 
 ---
+
+---
+
+## ✅ Parity Verification
+
+**jukebox-infer has been rigorously verified to produce 100% identical VQ-VAE features compared to the original OpenAI Jukebox.**
+
+### Test Results
+
+| Metric | Result |
+|--------|--------|
+| **max \|Δ\|** | 0.000000e+00 |
+| **mean \|Δ\|** | 0.000000e+00 |
+| **Feature shape** | (1, 6146) - identical |
+| **Feature range** | [8, 2035] - identical |
+| **Parity status** | ✅ **100% VERIFIED** |
+
+### What This Means
+
+- ✅ **Perfect numerical match** - Zero difference in VQ-VAE feature extraction
+- ✅ **Drop-in replacement** - Can completely replace original Jukebox for feature extraction
+- ✅ **No accuracy loss** - Maintains 100% fidelity to original implementation
+- ✅ **Research confidence** - Validated for academic and production use
+
+### Testing Methodology
+
+Parity was verified using:
+- Multiple audio durations (5s, 20s)
+- Identical official OpenAI checkpoints
+- Rigorous numerical comparison (rtol=1e-4, atol=1e-6)
+- Both CPU and GPU modes tested
+
+**For full details, see [PARITY_VERIFICATION.md](docs/PARITY_VERIFICATION.md)**
 
 ---
 
@@ -237,7 +279,7 @@ This seminal work introduced hierarchical music generation with conditioning on 
 - All model architectures (100% original)
 - All generation algorithms (100% original)
 - All model weights (100% original)
-- Audio quality (100% identical to original)
+- VQ-VAE feature extraction (✅ **100% parity verified** - see [PARITY_VERIFICATION.md](docs/PARITY_VERIFICATION.md))
 
 ---
 
