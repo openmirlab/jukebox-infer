@@ -2,6 +2,7 @@
 
 **Inference-only implementation of OpenAI Jukebox for modern PyTorch (2.7+)**
 
+[![PyPI](https://img.shields.io/pypi/v/jukebox-infer)](https://pypi.org/project/jukebox-infer/)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.7+-red.svg)](https://pytorch.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -44,18 +45,35 @@ High-quality music generation models for creating music from scratch or continui
 
 ### Installation
 
+**From PyPI:**
+
 ```bash
 # Using pip
 pip install jukebox-infer
 
-# Using UV (recommended for development)
+# Using uv (recommended - faster)
 uv pip install jukebox-infer
 
-# For development/comparison with original Jukebox
-cd jukebox-infer
-pip install -e .  # Must run from inside jukebox-infer/ directory
+# Or add to your project with uv
+uv add jukebox-infer
 ```
 
+**For Development:**
+
+```bash
+# Clone the repository
+git clone https://github.com/openmirlab/jukebox-infer.git
+cd jukebox-infer
+
+# Install in editable mode
+pip install -e .
+
+# Or with uv
+uv pip install -e .
+```
+
+> **Package:** https://pypi.org/project/jukebox-infer/
+>
 > **Note:** If you're setting up both the original Jukebox and jukebox-infer for comparison testing, see [../JUKEBOX_SETUP.md](../JUKEBOX_SETUP.md) for detailed environment setup instructions.
 
 ### Command-Line Interface (Fastest)
