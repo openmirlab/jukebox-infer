@@ -3,12 +3,32 @@ Simple API for Jukebox inference.
 """
 
 import os
-import torch
+from typing import Optional
+
 import numpy as np
+import torch
+
 from jukebox_infer.hparams import Hyperparams
-from jukebox_infer.make_models import make_model, download_checkpoints
-from jukebox_infer.sample import ancestral_sample, primed_sample, load_prompts
-from jukebox_infer.utils.audio_utils import save_wav, load_audio
+from jukebox_infer.make_models import download_checkpoints, make_model
+from jukebox_infer.sample import ancestral_sample, load_prompts, primed_sample
+from jukebox_infer.utils.audio_utils import load_audio, save_wav
+
+
+def set_seed(seed: int) -> None:
+    """
+    Set all random seeds for reproducibility.
+
+    Args:
+        seed: Random seed value
+    """
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed(seed)
+        torch.cuda.manual_seed_all(seed)
+    np.random.seed(seed)
+    # For full determinism (may slow down slightly)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
 
 
 class Jukebox:
@@ -64,7 +84,8 @@ class Jukebox:
         lyrics="",
         duration_seconds=20,
         temperature=0.99,
-        output_path=None
+        output_path=None,
+        seed: Optional[int] = None,
     ):
         """
         Generate music from scratch.
@@ -76,10 +97,14 @@ class Jukebox:
             duration_seconds: Duration of audio to generate
             temperature: Sampling temperature (default 0.99)
             output_path: Where to save audio (optional)
+            seed: Random seed for reproducibility (optional)
 
         Returns:
             numpy array of audio samples
         """
+        if seed is not None:
+            set_seed(seed)
+
         if self.vqvae is None:
             self.load(sample_length_in_seconds=duration_seconds)
 
@@ -139,7 +164,9 @@ class Jukebox:
         prompt_audio,
         prompt_duration=12,
         total_duration=30,
-        output_path=None
+        temperature=0.99,
+        output_path=None,
+        seed: Optional[int] = None,
     ):
         """
         Generate music continuation from an audio prompt.
@@ -148,11 +175,16 @@ class Jukebox:
             prompt_audio: Path to audio file or numpy array
             prompt_duration: How many seconds of prompt to use
             total_duration: Total duration to generate
+            temperature: Sampling temperature (default 0.99)
             output_path: Where to save audio (optional)
+            seed: Random seed for reproducibility (optional)
 
         Returns:
             numpy array of audio samples
         """
+        if seed is not None:
+            set_seed(seed)
+
         if self.vqvae is None:
             self.load(sample_length_in_seconds=total_duration)
 
@@ -175,9 +207,9 @@ class Jukebox:
         chunk_size = 32 if self.model_name == '1b_lyrics' else 16
         max_batch_size = 32 if self.model_name == '1b_lyrics' else 16
         sampling_kwargs = [
-            dict(temp=0.99, fp16=True, chunk_size=64, max_batch_size=32),
-            dict(temp=0.99, fp16=True, chunk_size=64, max_batch_size=32),
-            dict(temp=0.99, fp16=True, chunk_size=chunk_size, max_batch_size=max_batch_size)
+            dict(temp=temperature, fp16=True, chunk_size=64, max_batch_size=32),
+            dict(temp=temperature, fp16=True, chunk_size=64, max_batch_size=32),
+            dict(temp=temperature, fp16=True, chunk_size=chunk_size, max_batch_size=max_batch_size)
         ]
 
         # Generate

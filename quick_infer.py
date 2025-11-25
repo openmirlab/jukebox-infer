@@ -102,7 +102,14 @@ def main():
         default=5.0,
         help="Duration of prompt audio to use in seconds (default: 5.0)"
     )
-    
+
+    parser.add_argument(
+        "--seed",
+        type=int,
+        default=None,
+        help="Random seed for reproducibility (optional)"
+    )
+
     args = parser.parse_args()
     
     # Validate duration
@@ -129,6 +136,8 @@ def main():
         print(f"Genre: {args.genre}")
     print(f"Duration: {args.duration} seconds")
     print(f"Output: {args.output}")
+    if args.seed is not None:
+        print(f"Seed: {args.seed}")
     print("=" * 70)
     
     try:
@@ -150,7 +159,8 @@ def main():
                 prompt_duration=args.prompt_duration,
                 total_duration=args.duration,
                 temperature=args.temperature,
-                output_path=args.output
+                output_path=args.output,
+                seed=args.seed,
             )
         else:
             # Ancestral generation
@@ -160,7 +170,8 @@ def main():
                 lyrics=args.lyrics,
                 duration_seconds=args.duration,
                 temperature=args.temperature,
-                output_path=args.output
+                output_path=args.output,
+                seed=args.seed,
             )
         
         print("\n" + "=" * 70)
