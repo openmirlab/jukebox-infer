@@ -1,3 +1,20 @@
+"""Conditioner modules: embed lower-level VQ-VAE codes and label/time-range
+signals into the width the prior transformer expects.
+
+`Conditioner` upsamples a lower level's discrete codes; `SimpleEmbedding`
+embeds artist/genre ids; `RangeEmbedding` bins a continuous
+[pos_start, pos_end] range into `n_time` interpolated positions; and
+`LabelConditioner` combines all three into the prior's `y`-conditioning.
+`RangeEmbedding`/`LabelConditioner` explicitly cast `n_time` to `int` in
+`__init__` -- upstream hparam arithmetic (e.g. `make_vqvae`'s
+`np.prod`-derived sample-length math) can taint it to `numpy.float64`,
+which otherwise breaks `RangeEmbedding.forward`'s
+`t.arange(...).view(1, n_time)` (`view` requires a real `int`).
+
+Reads: jukebox_infer.transformer.ops, jukebox_infer.vqvae.encdec,
+jukebox_infer.utils.torch_utils; read by: jukebox_infer.prior.prior
+"""
+
 import torch as t
 import torch.nn as nn
 
@@ -78,7 +95,10 @@ class RangeEmbedding(nn.Module):
     # NOTE: Open ended interval on right, so start <= pos < end, not <= end
     def __init__(self, n_time, bins, range, out_width, init_scale, clamp=False):
         super().__init__()
-        self.n_time = n_time
+        # Cast: upstream hparam arithmetic (e.g. make_vqvae's np.prod-derived
+        # sample_length math) can taint n_time to numpy.float64, which later
+        # breaks forward()'s t.arange(...).view(1, n_time) (view needs int).
+        self.n_time = int(n_time)
         self.bins = bins
         self.emb = nn.Embedding(bins, out_width)
         nn.init.normal_(self.emb.weight, std=0.01 * init_scale)
@@ -115,7 +135,9 @@ class RangeEmbedding(nn.Module):
 class LabelConditioner(nn.Module):
     def __init__(self, y_bins, t_bins, sr, min_duration, max_duration, n_time, out_width, init_scale, max_bow_genre_size, include_time_signal):
         super().__init__()
-        self.n_time = n_time
+        # Cast: same numpy.float64 taint as RangeEmbedding.n_time (see there);
+        # this n_time is forwarded straight into RangeEmbedding(n_time, ...).
+        self.n_time = int(n_time)
         self.out_width = out_width
         assert len(y_bins) == 2, f"Expecting (genre, artist) bins, got {y_bins}"
         bow_genre_bins, artist_bins = y_bins
