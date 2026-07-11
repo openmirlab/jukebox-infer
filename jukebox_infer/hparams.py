@@ -1,3 +1,20 @@
+"""Hyperparameter registry: named hparam sets for the VQ-VAE and each prior level.
+
+`setup_hparams(name_or_names, kwargs)` composes one or more named entries
+from `HPARAMS_REGISTRY` (e.g. `"vqvae,1b_lyrics_prior,1b_lyrics"`) into a
+single `Hyperparams` dict, consumed by `make_models.make_vqvae` /
+`make_prior`. `REMOTE_PREFIX` + each entry's `restore_vqvae`/`restore_prior`
+is where the OpenAI Azure checkpoint URLs live (see
+jukebox_infer/data/checkpoints.json for the provenance-tracked version of
+this same list). Model architecture hparams (widths, depths, strides, ...)
+are untouched from the original Jukebox training code -- this file only
+governs which checkpoint loads and how inference is configured, not the
+model math itself.
+
+Reads: (leaf module, no local imports); read by: jukebox_infer.make_models,
+jukebox_infer.api, jukebox_infer/data/checkpoints.json (URL cross-reference)
+"""
+
 HPARAMS_REGISTRY = {}
 DEFAULTS = {}
 

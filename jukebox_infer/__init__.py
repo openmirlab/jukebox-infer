@@ -1,12 +1,15 @@
+"""Jukebox-Infer: Minimal inference-only implementation of OpenAI Jukebox.
+
+Public entry point: the `Jukebox` class (jukebox_infer.api) wraps model
+loading, ancestral/primed sampling, and audio saving behind `.load()` /
+`.generate()` / `.generate_from_audio()`. See README.md for the CLI and
+Python API usage, and CLAUDE.md for the internal module layout.
+
+Reads: jukebox_infer.api (Jukebox, set_seed), jukebox_infer.make_models
+(download_checkpoints), jukebox_infer.__about__ (version)
 """
-Jukebox-Infer: Minimal inference-only implementation of OpenAI Jukebox
 
-This package provides a streamlined version of Jukebox for music generation,
-optimized for PyTorch 2.7+ and single-GPU inference.
-"""
-
-__version__ = "0.1.0"
-
+from jukebox_infer.__about__ import __version__
 from jukebox_infer.api import Jukebox, set_seed
 from jukebox_infer.make_models import download_checkpoints
 

@@ -1,7 +1,16 @@
-"""
-Make model classes
-Load from checkpoints
-Test on dummy outputs to see if everything matches
+"""Model construction + checkpoint loading: builds the VQ-VAE and prior stack.
+
+`make_model(model_name, ...)` is the top-level factory the `Jukebox` API
+calls: it resolves `MODELS[model_name]` to a (vqvae, *priors) hparam-set
+tuple, builds each module, and calls `restore_model` to load (auto-
+downloading via `utils.remote_utils.download` if missing) its checkpoint
+from `~/.cache/jukebox/...`. `download_checkpoints()` is the standalone
+pre-download entry point exposed as `jukebox_infer.download_checkpoints`.
+No training code -- eval-mode + `freeze_model` are the only post-load steps.
+
+Reads: jukebox_infer.hparams (Hyperparams, setup_hparams, REMOTE_PREFIX),
+jukebox_infer.utils.remote_utils, jukebox_infer.vqvae.vqvae,
+jukebox_infer.prior.prior; read by: jukebox_infer.api, jukebox_infer.__init__
 """
 import os
 import numpy as np

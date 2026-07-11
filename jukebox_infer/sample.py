@@ -1,3 +1,18 @@
+"""Sampling entry points: ancestral (from-scratch) and primed (audio-continuation) generation.
+
+`ancestral_sample` drives all three prior levels top-down from empty context;
+`primed_sample` first encodes a real audio prompt through the VQ-VAE (via
+`load_prompts`) and continues from there. Both windowed-sample the
+autoregressive priors level-by-level -- this is the actual generation loop
+the `Jukebox.generate()` / `.generate_from_audio()` API methods call.
+Device placement and batching here are unchanged from upstream Jukebox;
+this campaign did not touch model/sampling numerics.
+
+Reads: jukebox_infer.hparams, jukebox_infer.utils.torch_utils,
+jukebox_infer.utils.audio_utils, jukebox_infer.utils.sample_utils,
+jukebox_infer.utils.dist_utils; read by: jukebox_infer.api
+"""
+
 import torch as t
 
 from jukebox_infer.hparams import Hyperparams
