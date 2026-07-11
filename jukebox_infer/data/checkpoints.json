@@ -1,0 +1,47 @@
+{
+  "_comment": "Checkpoint provenance for jukebox-infer. Every checkpoint is a third-party OpenAI Jukebox release, downloaded at runtime from the Azure mirror below via jukebox_infer.utils.remote_utils.download and cached under ~/.cache/jukebox/models/ (never bundled in this package). URLs and approximate sizes are transcribed from jukebox_infer/hparams.py's HPARAMS_REGISTRY (restore_vqvae/restore_prior fields) and download_checkpoints.sh, current as of the ADOPT campaign (feat/adopt-constitution, 2026-07-11). sha256 is intentionally NOT recorded here: computing it requires downloading all ~6.2-10GB of checkpoints, which this campaign explicitly avoided (heavy GPU/weights work is out of scope -- see repo CLAUDE.md). Only the '1b_lyrics' model is exercised/tested by this package today; '5b' and '5b_lyrics' entries exist in hparams.py but are not covered by any README workflow.",
+  "checkpoints": {
+    "vqvae": {
+      "url": "https://openaipublic.azureedge.net/jukebox/models/5b/vqvae.pth.tar",
+      "sha256": null,
+      "approx_size_bytes": 7800000,
+      "shared_by": ["5b", "5b_lyrics", "1b_lyrics"],
+      "original_author": "OpenAI (Jukebox, Dhariwal et al. 2020)"
+    },
+    "upsampler_level_0": {
+      "url": "https://openaipublic.azureedge.net/jukebox/models/5b/prior_level_0.pth.tar",
+      "sha256": null,
+      "approx_size_bytes": 2200000000,
+      "shared_by": ["5b", "5b_lyrics", "1b_lyrics"],
+      "original_author": "OpenAI (Jukebox, Dhariwal et al. 2020)"
+    },
+    "upsampler_level_1": {
+      "url": "https://openaipublic.azureedge.net/jukebox/models/5b/prior_level_1.pth.tar",
+      "sha256": null,
+      "approx_size_bytes": 2200000000,
+      "shared_by": ["5b", "5b_lyrics", "1b_lyrics"],
+      "original_author": "OpenAI (Jukebox, Dhariwal et al. 2020)"
+    },
+    "prior_5b": {
+      "url": "https://openaipublic.azureedge.net/jukebox/models/5b/prior_level_2.pth.tar",
+      "sha256": null,
+      "approx_size_bytes": null,
+      "shared_by": ["5b"],
+      "original_author": "OpenAI (Jukebox, Dhariwal et al. 2020)"
+    },
+    "prior_5b_lyrics": {
+      "url": "https://openaipublic.azureedge.net/jukebox/models/5b_lyrics/prior_level_2.pth.tar",
+      "sha256": null,
+      "approx_size_bytes": null,
+      "shared_by": ["5b_lyrics"],
+      "original_author": "OpenAI (Jukebox, Dhariwal et al. 2020)"
+    },
+    "prior_1b_lyrics": {
+      "url": "https://openaipublic.azureedge.net/jukebox/models/1b_lyrics/prior_level_2.pth.tar",
+      "sha256": null,
+      "approx_size_bytes": 1800000000,
+      "shared_by": ["1b_lyrics"],
+      "original_author": "OpenAI (Jukebox, Dhariwal et al. 2020)"
+    }
+  }
+}

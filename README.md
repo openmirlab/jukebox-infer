@@ -78,17 +78,29 @@ uv pip install -e .
 
 ### Command-Line Interface (Fastest)
 
+If you installed via pip/uv, a `jukebox-infer` console script is available
+directly on your PATH:
+
 ```bash
 # Basic generation (default: 20 seconds, The Beatles, Rock)
-python quick_infer.py
+jukebox-infer
 
 # Custom artist and genre
-python quick_infer.py --artist "Taylor Swift" --genre "Pop" --duration 30
+jukebox-infer --artist "Taylor Swift" --genre "Pop" --duration 30
 
 # Audio continuation from existing audio
-python quick_infer.py --prompt input.wav --prompt-duration 5 --duration 20 --output continuation.wav
+jukebox-infer --prompt input.wav --prompt-duration 5 --duration 20 --output continuation.wav
 
 # See all options
+jukebox-infer --help
+```
+
+If you're working from a repo checkout instead, `quick_infer.py` is an
+equivalent standalone entry point (both call the same code in
+`jukebox_infer/quick_infer.py`):
+
+```bash
+python quick_infer.py --artist "Taylor Swift" --genre "Pop" --duration 30
 python quick_infer.py --help
 ```
 
@@ -205,22 +217,24 @@ This matches the original implementation's performance characteristics.
 jukebox-infer/
 ├── jukebox_infer/      # Main package
 │   ├── api.py         # High-level Jukebox API
-│   ├── cli.py         # CLI interface
+│   ├── cli.py         # Console-script entry point (thin re-export)
+│   ├── quick_infer.py # CLI argument parsing + generation drive loop
 │   ├── make_models.py # Model loading and checkpoint management
 │   ├── sample.py      # Sampling functions
 │   ├── prior/         # Prior model implementations
 │   ├── vqvae/         # VQ-VAE encoder/decoder
 │   ├── transformer/   # Transformer architecture
-│   └── data/         # Data processing utilities
+│   └── data/          # Data processing utilities + checkpoints.json (provenance)
 ├── docs/              # Documentation
 │   ├── PARITY_VERIFICATION.md      # ✅ 100% parity proof
-│   ├── CHECKPOINT_ARCHITECTURE.md
-│   └── dev/           # Development guidelines
-│       └── PRINCIPLES.md
+│   └── CHECKPOINT_ARCHITECTURE.md
+├── tests/             # Import/CLI/hparams smoke tests + network-marked liveness test
+├── tools/             # check_weights_liveness.py
 ├── examples/          # Example scripts
-├── quick_infer.py     # Quick inference script (standalone)
+├── quick_infer.py     # Standalone shim -> jukebox_infer.quick_infer.main
 ├── download_checkpoints.sh  # Manual download script
 ├── pyproject.toml
+├── CLAUDE.md
 ├── LICENSE
 └── README.md
 ```

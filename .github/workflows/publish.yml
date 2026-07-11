@@ -3,6 +3,10 @@ name: Publish to PyPI
 # This workflow publishes the package to PyPI when a GitHub Release is created.
 # It uses PyPI's trusted publishing feature, which must be configured on PyPI
 # for the GitHub organization (openmirlab) and repository (jukebox-infer).
+#
+# Per the org constitution's article-7 amendment ("publishing gates on
+# tests"), `publish` now depends on `test` passing first -- no more
+# publishing straight off `python -m build` with no test step in between.
 
 on:
   release:
@@ -15,7 +19,22 @@ on:
         type: string
 
 jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Install uv
+        run: pip install uv
+      - name: Install dependencies
+        run: uv sync
+      - name: Run tests (network tests deselected)
+        run: uv run --with pytest python -m pytest -q
+
   publish:
+    needs: [test]
     runs-on: ubuntu-latest
     # Note: Environment is optional. If you want to add protection rules later,
     # create an environment named "pypi" in repository settings → Environments

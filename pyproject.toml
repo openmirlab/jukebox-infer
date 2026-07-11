@@ -1,6 +1,6 @@
 [project]
 name = "jukebox-infer"
-version = "0.1.0"
+dynamic = ["version"]
 description = "Inference-only implementation of OpenAI Jukebox for PyTorch 2.7+"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -53,6 +53,9 @@ Issues = "https://github.com/openmirlab/jukebox-infer/issues"
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+[tool.hatch.version]
+path = "jukebox_infer/__about__.py"
+
 [tool.hatch.build.targets.wheel]
 packages = ["jukebox_infer"]
 
@@ -60,6 +63,7 @@ packages = ["jukebox_infer"]
 include = [
     "jukebox_infer/**/*.py",
     "jukebox_infer/data/ids/*.txt",
+    "jukebox_infer/data/*.json",
 ]
 
 [tool.pytest.ini_options]
@@ -67,9 +71,13 @@ testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
+markers = [
+    "network: hits real network endpoints (deselected by default, run with -m network)",
+]
 addopts = [
     "-v",
     "--strict-markers",
+    "-m", "not network",
 ]
 
 [tool.ruff]

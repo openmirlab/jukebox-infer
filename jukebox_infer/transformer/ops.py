@@ -1,15 +1,25 @@
+"""Transformer building-block ops: LayerNorm variant, activations, fp16 conv-weight cast.
+
+`LayerNorm` used to try importing `apex.normalization.FusedLayerNorm` (a
+training-era compiled CUDA extension, not a PyPI-installable inference
+dependency) before falling back to plain `torch.nn.LayerNorm`. Since this
+package never depends on apex and the fallback was always what actually ran
+in an inference-only install, the try/except is gone -- `torch.nn.LayerNorm`
+is now the only path, with the same `.float()` upcast-for-large-tensors
+behavior preserved.
+
+Reads: torch; read by: jukebox_infer.transformer.transformer,
+jukebox_infer.transformer.factored_attention, jukebox_infer.prior.*
+"""
+
 import math
+
 import numpy as np
 import torch as t
 import torch.nn as nn
 import torch.nn.functional as F
+from torch.nn import LayerNorm as FusedLayerNorm
 
-# Import FusedLayerNorm if we have apex, otherwise use regular LayerNorm
-try:
-    from apex.normalization import FusedLayerNorm
-    print("Using apex FusedLayerNorm")
-except ImportError:
-    from torch.nn import LayerNorm as FusedLayerNorm
 
 class LayerNorm(FusedLayerNorm):
     def __init__(self, normalized_shape, eps=1e-5, elementwise_affine=True):
