@@ -9,4 +9,4 @@ Reads: (leaf file, no imports); read by: pyproject.toml [tool.hatch.version],
 jukebox_infer/__init__.py
 """
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
