@@ -66,7 +66,9 @@ this one>, where useful
 Model-architecture internals (`vqvae/`, `prior/`, `transformer/transformer.py`,
 `transformer/factored_attention.py`) are intentionally left without this
 treatment -- this repo's ADOPT pass touched packaging/CLI/tooling, not model
-internals.
+internals. `jukebox_infer/prior/conditioners.py` is the one exception: a
+later bug-fix campaign (the `n_time` int-cast fix, see CHANGELOG) touched it
+directly, so it got a header under the touched-file rule.
 
 ## Verification
 

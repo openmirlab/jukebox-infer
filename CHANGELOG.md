@@ -5,6 +5,23 @@ All notable changes to Jukebox-Infer will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+- **`RangeEmbedding`/`LabelConditioner` crashed with `TypeError` when
+  `n_time` was tainted to `numpy.float64`.** Upstream hparam arithmetic
+  (e.g. `make_vqvae`'s `np.prod`-derived sample-length math) can turn
+  `hps.sample_length` and everything downstream of it (`z_shapes`, `n_time`)
+  into `numpy.float64` instead of a plain `int`. `RangeEmbedding.__init__`
+  and `LabelConditioner.__init__` stored `n_time` verbatim, so
+  `RangeEmbedding.forward`'s `t.arange(...).view(1, n_time)` later raised
+  `TypeError: view(): argument 'size' failed to unpack ... got numpy.float64`
+  (`torch.Tensor.view` requires a real `int`, not just an int-valued float).
+  Discovered by the sheetsage-infer campaign when it replaced its vendored
+  jukebox fork (which had independently fixed this) with this package; fixed
+  by casting `n_time` to `int` in both constructors, in
+  `jukebox_infer/prior/conditioners.py`.
+
 ## [0.1.1] - 2026-07-11
 
 ADOPT-lite campaign (openmirlab modernization, `feat/adopt-constitution`) --
