@@ -21,7 +21,8 @@ High-quality music generation models for creating music from scratch or continui
 
 ## 🎉 What's New
 
-- **v0.1.0** (Latest): Initial release - Clean inference-only implementation extracted from OpenAI Jukebox
+- **v0.1.1** (Latest): Fixed the installed `jukebox-infer` console script, which previously failed on every install with "Error: quick_infer.py not found"; removed a dead `apex` import remnant from the transformer code
+- **v0.1.0**: Initial release - Clean inference-only implementation extracted from OpenAI Jukebox
 
 ---
 
