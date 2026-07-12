@@ -1,10 +1,10 @@
 # Jukebox-Infer
 
-**Inference-only implementation of OpenAI Jukebox for modern PyTorch (2.7+)**
+**Inference-only implementation of OpenAI Jukebox for modern PyTorch (2.13+)**
 
 [![PyPI](https://img.shields.io/pypi/v/jukebox-infer)](https://pypi.org/project/jukebox-infer/)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
-[![PyTorch](https://img.shields.io/badge/PyTorch-2.7+-red.svg)](https://pytorch.org/)
+[![PyTorch](https://img.shields.io/badge/PyTorch-2.13+-red.svg)](https://pytorch.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 High-quality music generation models for creating music from scratch or continuing existing audio tracks.
@@ -13,7 +13,7 @@ High-quality music generation models for creating music from scratch or continui
 
 ## 📌 Overview
 
-**Jukebox-Infer** is a streamlined, inference-only version of [OpenAI Jukebox](https://github.com/openai/jukebox), optimized for PyTorch 2.7+ with minimal dependencies.
+**Jukebox-Infer** is a streamlined, inference-only version of [OpenAI Jukebox](https://github.com/openai/jukebox), optimized for PyTorch 2.13+ with minimal dependencies.
 
 > **Note**: This project is based on [OpenAI Jukebox](https://github.com/openai/jukebox). All credit for the original model and research belongs to OpenAI and the Jukebox authors.
 
@@ -30,7 +30,7 @@ High-quality music generation models for creating music from scratch or continui
 
 - ✅ **100% Parity Verified** - VQ-VAE features identical to original Jukebox (see [Parity Verification](docs/PARITY_VERIFICATION.md))
 - ✅ **Inference-only** - No training code, significantly reduced codebase (~47% reduction)
-- ✅ **Modern PyTorch** - Compatible with PyTorch 2.7+
+- ✅ **Modern PyTorch** - Compatible with PyTorch 2.13+
 - ✅ **Single-GPU** - No MPI or distributed dependencies
 - ✅ **Minimal dependencies** - Removed tensorboardX, apex, and training-specific libs
 - ✅ **Auto-download** - Automatic checkpoint downloads on first use
@@ -183,7 +183,7 @@ Checkpoints are cached in `~/.cache/jukebox/models/`:
 ## 📋 Requirements
 
 - **Python**: ≥3.10
-- **PyTorch**: ≥2.7.0
+- **PyTorch**: ≥2.13.0
 - **GPU**: CUDA-capable GPU (16GB+ VRAM recommended for 1b_lyrics)
 - **OS**: Linux, macOS, Windows
 
@@ -300,10 +300,10 @@ This seminal work introduced hierarchical music generation with conditioning on 
 
 ### About This Implementation
 
-> **Note**: The original Jukebox repository is no longer actively maintained. This package was created to continue the excellent work by providing ongoing maintenance and PyTorch 2.7+ compatibility for the inference capabilities, while preserving 100% of the original model quality and algorithms.
+> **Note**: The original Jukebox repository is no longer actively maintained. This package was created to continue the excellent work by providing ongoing maintenance and PyTorch 2.13+ compatibility for the inference capabilities, while preserving 100% of the original model quality and algorithms.
 
 **What we maintain:**
-- PyTorch 2.7+ compatibility
+- PyTorch 2.13+ compatibility
 - Modern dependency management
 - Inference-only packaging
 - GPU optimization

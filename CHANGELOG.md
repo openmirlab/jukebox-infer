@@ -5,6 +5,68 @@ All notable changes to Jukebox-Infer will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+## CI matrix + dependency floor refresh (2026-07-12, branch `fix/ci-matrix`)
+
+An org audit found this repo tested only Python 3.10, and only inside
+`publish.yml`'s release-gate job -- there was no dedicated `test.yml` running
+on every push/PR, even though `pyproject.toml` classifiers claimed Python
+3.10-3.12 support. This change builds that CI and confirms every claimed
+Python version actually passes the 27-test suite, plus refreshes stale
+dependency floors. Dependabot: 0 open alerts (reconfirmed via
+`gh api repos/openmirlab/jukebox-infer/dependabot/alerts`), no security fixes
+needed.
+
+### Added
+- **`.github/workflows/test.yml`**: a `test` job running the full `pytest`
+  suite across a Python 3.10/3.11/3.12/3.13 matrix via `uv` (`uv sync --extra
+  dev --python <version>` -- this repo declares dev deps under
+  `[project.optional-dependencies].dev`, not a uv dependency-group, so the
+  bare `uv sync` in `publish.yml` would silently skip pytest; `--extra dev`
+  is required and was verified empirically), plus a `build` job (`needs:
+  [test]`) doing the wheel-from-sdist build (`python -m build`), a clean-venv
+  install, and an import smoke test touching `Jukebox` and `__version__`
+  (org constitution article 7). All four Python versions were verified green
+  *before* being added to the matrix -- none were excluded. Python 3.13 was
+  the one at risk (torch historically lagged on cp313 wheels) but torch
+  2.13.0 ships `cp310`/`cp311`/`cp312`/`cp313` manylinux wheels, confirmed via
+  the PyPI file listing, and the suite passed under all four.
+- `Programming Language :: Python :: 3.13` classifier, now that 3.13 is
+  verified green.
+
+### Changed
+- Stale dependency floors raised, each re-verified green across the full
+  Python 3.10-3.13 matrix after bumping:
+  - `torch>=2.7.0` -> `>=2.13.0` (current PyPI latest stable; has cp310-cp313
+    wheels).
+  - `numpy>=1.21.0` -> `>=2.2.6` (not the current numpy latest, 2.5.1: numpy
+    `>=2.3` requires Python>=3.11 and `>=2.5` requires Python>=3.12, both of
+    which would break this repo's `>=3.10` floor. `2.2.6` is the newest 2.x
+    release with a Python 3.10 wheel -- verified via the PyPI JSON API's
+    `requires_python` field for 2.2.6 (`>=3.10`), 2.3.4 (`>=3.11`), and 2.5.1
+    (`>=3.12`). Same trap and same resolution as larsnet-infer's CHANGELOG.)
+  - `tqdm>=4.0.0` -> `>=4.68.4` (current PyPI latest; low-risk, no Python
+    floor conflict -- `requires_python >=3.8`).
+  - `librosa`, `soundfile`, `unidecode` floors left untouched -- not flagged
+    stale by the prior audit and no incompatibility surfaced while testing
+    the matrix.
+- `uv.lock` regenerated (`uv lock`, 79 packages resolved) after the floor
+  bumps, then re-synced and re-tested per Python version with `uv sync
+  --locked` to confirm the lockfile actually satisfies all four versions.
+- `pyproject.toml` description and README PyTorch references updated from
+  `2.7+` to `2.13+` to match the new floor (badge, requirements section,
+  "What we maintain" section).
+- Test count confirmed unchanged across every step of this change: **27
+  passed / 6 deselected** (the 6 are `network`-marked, deselected by the
+  `-m not network` addopt), identical on Python 3.10, 3.11, 3.12, and 3.13,
+  both before and after the floor bumps.
+
+`publish.yml`'s own `test` job is left untouched (still Python-3.10-only) --
+that is a deliberate release-gate simplicity per the existing convention,
+not something this change needed to fix; `test.yml` is now the workflow that
+actually exercises the full matrix on every push/PR.
+
 ## [0.1.2] - 2026-07-11
 
 ### Fixed
