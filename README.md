@@ -11,40 +11,104 @@ High-quality music generation models for creating music from scratch or continui
 
 ---
 
-## 📌 Overview
+## Why this exists
 
-**Jukebox-Infer** is a streamlined, inference-only version of [OpenAI Jukebox](https://github.com/openai/jukebox), optimized for PyTorch 2.13+ with minimal dependencies.
+[OpenAI Jukebox](https://github.com/openai/jukebox) is a landmark hierarchical
+VQ-VAE + transformer music generation model, but the upstream repository is
+no longer actively maintained: it targets an old PyTorch release, depends on
+MPI and `apex` for distributed training that inference users don't need, and
+has not picked up compatibility fixes for modern PyTorch.
 
-> **Note**: This project is based on [OpenAI Jukebox](https://github.com/openai/jukebox). All credit for the original model and research belongs to OpenAI and the Jukebox authors.
+**Jukebox-Infer** re-provides just the inference path — checkpoint download,
+model construction, and ancestral/primed sampling — as a small,
+single-GPU-only package that installs cleanly on PyTorch 2.13+ with no MPI or
+`apex` dependency (~47% smaller codebase than upstream). All model
+architectures, generation algorithms, and weights are unchanged from the
+original; see [Parity Verification](docs/PARITY_VERIFICATION.md) for a
+rigorous numerical proof that the VQ-VAE feature extraction is bit-identical
+to upstream.
 
----
-
-## 🎉 What's New
-
-- **v0.1.1** (Latest): Fixed the installed `jukebox-infer` console script, which previously failed on every install with "Error: quick_infer.py not found"; removed a dead `apex` import remnant from the transformer code
-- **v0.1.0**: Initial release - Clean inference-only implementation extracted from OpenAI Jukebox
-
----
-
-## ✨ Features
-
-- ✅ **100% Parity Verified** - VQ-VAE features identical to original Jukebox (see [Parity Verification](docs/PARITY_VERIFICATION.md))
-- ✅ **Inference-only** - No training code, significantly reduced codebase (~47% reduction)
-- ✅ **Modern PyTorch** - Compatible with PyTorch 2.13+
-- ✅ **Single-GPU** - No MPI or distributed dependencies
-- ✅ **Minimal dependencies** - Removed tensorboardX, apex, and training-specific libs
-- ✅ **Auto-download** - Automatic checkpoint downloads on first use
-- ✅ **GPU acceleration** - Full CUDA support with optimized device management
-- ✅ **Simple API** - High-level `Jukebox` class for easy music generation
-- ✅ **Audio continuation** - Support for primed sampling from audio prompts
+For the full research codebase (training, MPI, `apex`), use
+[openai/jukebox](https://github.com/openai/jukebox) directly.
 
 ---
 
+## Acknowledgments
+
+**Jukebox-Infer** is built entirely on the model, algorithms, and weights
+released by the original Jukebox project. This package's own contribution is
+limited to the maintenance work described in [Why this exists](#why-this-exists)
+above — packaging, dependency modernization, and inference-only trimming.
+
+- **[openai/jukebox](https://github.com/openai/jukebox)** — the original
+  research codebase this package is derived from.
+- **Prafulla Dhariwal, Heewoo Jun, Christine Payne, Jong Wook Kim, Alec
+  Radford, Ilya Sutskever** — original authors of the
+  [Jukebox paper](https://arxiv.org/abs/2005.00341) and model (see
+  [Citation](#citation) below for the full bibtex).
+- **Checkpoint host**: original weights are served from OpenAI's own
+  `https://openaipublic.azureedge.net/` CDN (auto-downloaded by this
+  package — see [What this project will NEVER bundle](#what-this-project-will-never-bundle)).
+
+All credit for the model architecture, generation algorithms, and released
+weights belongs to OpenAI and the original Jukebox authors.
+
+## Citation
+
+If you use Jukebox-Infer in your research, please cite the original Jukebox
+paper — this package is a maintenance fork, not new research:
+
+```bibtex
+@article{dhariwal2020jukebox,
+  title={Jukebox: A Generative Model for Music},
+  author={Dhariwal, Prafulla and Jun, Heewoo and Payne, Christine and Kim, Jong Wook and Radford, Alec and Sutskever, Ilya},
+  journal={arXiv preprint arXiv:2005.00341},
+  year={2020}
+}
+```
+
 ---
 
-## 🚀 Quick Start
+## Features
 
-### Installation
+- **100% Parity Verified** - VQ-VAE features identical to original Jukebox (see [Parity Verification](docs/PARITY_VERIFICATION.md))
+- **Inference-only** - No training code, significantly reduced codebase (~47% reduction)
+- **Modern PyTorch** - Compatible with PyTorch 2.13+
+- **Single-GPU** - No MPI or distributed dependencies
+- **Minimal dependencies** - Removed tensorboardX, apex, and training-specific libs
+- **Auto-download** - Automatic checkpoint downloads on first use
+- **GPU acceleration** - Full CUDA support with optimized device management
+- **Simple API** - High-level `Jukebox` class for easy music generation
+- **Audio continuation** - Support for primed sampling from audio prompts
+
+---
+
+## Scope
+
+**In scope, and exercised by every documented workflow in this README:**
+
+- The `1b_lyrics` model (~6.2GB checkpoints) — ancestral sampling and
+  audio-primed continuation, artist/genre/lyrics conditioning.
+- Single-GPU CUDA inference (16GB+ VRAM recommended), CPU fallback.
+
+**Out of scope, forever:**
+
+- **Training** — no training loop, no data pipeline; this is an
+  inference-only package by design.
+- **Distributed/multi-GPU inference** — no MPI, no `apex`; all upstream
+  distributed-training machinery was removed.
+
+**Present in code but untested/unsupported — do not rely on these:**
+
+- The `5b` and `5b_lyrics` model entries exist in `hparams.py`'s registry
+  (inherited from upstream) but are **not exercised by any documented
+  workflow, test, or CLI default in this package**. They may or may not
+  work; treat them as unmaintained until someone verifies and documents
+  them.
+
+---
+
+## Install
 
 **From PyPI:**
 
@@ -76,6 +140,10 @@ uv pip install -e .
 > **Package:** https://pypi.org/project/jukebox-infer/
 >
 > **Note:** If you're setting up both the original Jukebox and jukebox-infer for comparison testing, see [../JUKEBOX_SETUP.md](../JUKEBOX_SETUP.md) for detailed environment setup instructions.
+
+---
+
+## Quick Start
 
 ### Command-Line Interface (Fastest)
 
@@ -148,50 +216,22 @@ audio = model.generate_from_audio(
 
 ---
 
----
-
-## 📦 Download Checkpoints
-
-Checkpoints are **automatically downloaded** when you first use a model. No manual download needed!
-
-If you prefer to pre-download checkpoints manually:
-
-```bash
-# Option 1: Use the download script
-bash download_checkpoints.sh
-
-# Option 2: Use Python API
-from jukebox_infer import download_checkpoints
-download_checkpoints('1b_lyrics')  # Downloads ~6.2GB
-```
-
-Checkpoints are cached in `~/.cache/jukebox/models/`:
-- VQ-VAE (7.4MB) - shared encoder/decoder
-- Prior level 0 & 1 (4.4GB) - shared upsamplers  
-- Prior level 2 (1.8GB) - 1b_lyrics top-level model
-
----
-
-## 🎵 Available Models
+## Available Models
 
 | Model | Parameters | Download Size | VRAM | Description |
 |-------|-----------|---------------|------|-------------|
 | **`1b_lyrics`** | 1B | ~6.2GB | ~12GB | Lyrics conditioning support |
 
----
+See [Scope](#scope) above for why `5b`/`5b_lyrics` aren't listed here.
 
-## 📋 Requirements
+## Requirements
 
 - **Python**: ≥3.10
 - **PyTorch**: ≥2.13.0
 - **GPU**: CUDA-capable GPU (16GB+ VRAM recommended for 1b_lyrics)
 - **OS**: Linux, macOS, Windows
 
----
-
----
-
-## ⚡ Performance
+## Performance
 
 Generation is intentionally slow due to autoregressive nature:
 - **~5-15 seconds per second of audio** on RTX 4090 (with GPU acceleration)
@@ -202,17 +242,31 @@ This matches the original implementation's performance characteristics.
 
 > **Note**: Generation speed depends on GPU, model size, and generation length. The autoregressive nature means longer generations take proportionally longer.
 
----
+## Parity Verification
 
-## 📚 Documentation
+**jukebox-infer has been rigorously verified to produce 100% identical VQ-VAE features compared to the original OpenAI Jukebox.**
 
-- **[PARITY_VERIFICATION.md](docs/PARITY_VERIFICATION.md)** - ✅ **100% parity verification** with original Jukebox
-- **[CHECKPOINT_ARCHITECTURE.md](docs/CHECKPOINT_ARCHITECTURE.md)** - Details on checkpoint structure and sharing between models
-- **[Development Guidelines](docs/dev/PRINCIPLES.md)** - Development principles, code style, and contribution guidelines
+### Test Results
 
----
+| Metric | Result |
+|--------|--------|
+| **max \|Δ\|** | 0.000000e+00 |
+| **mean \|Δ\|** | 0.000000e+00 |
+| **Feature shape** | (1, 6146) - identical |
+| **Feature range** | [8, 2035] - identical |
+| **Parity status** | **100% VERIFIED** |
 
-## 🏗️ Project Structure
+### Testing Methodology
+
+Parity was verified using:
+- Multiple audio durations (5s, 20s)
+- Identical official OpenAI checkpoints
+- Rigorous numerical comparison (rtol=1e-4, atol=1e-6)
+- Both CPU and GPU modes tested
+
+**For full details, see [PARITY_VERIFICATION.md](docs/PARITY_VERIFICATION.md)**
+
+## Project Structure
 
 ```
 jukebox-infer/
@@ -227,7 +281,7 @@ jukebox-infer/
 │   ├── transformer/   # Transformer architecture
 │   └── data/          # Data processing utilities + checkpoints.json (provenance)
 ├── docs/              # Documentation
-│   ├── PARITY_VERIFICATION.md      # ✅ 100% parity proof
+│   ├── PARITY_VERIFICATION.md      # 100% parity proof
 │   └── CHECKPOINT_ARCHITECTURE.md
 ├── tests/             # Import/CLI/hparams smoke tests + network-marked liveness test
 ├── tools/             # check_weights_liveness.py
@@ -240,100 +294,89 @@ jukebox-infer/
 └── README.md
 ```
 
----
+## What's new
+
+See [CHANGELOG.md](CHANGELOG.md) for the full version history. Current
+release highlights:
+
+- **v0.1.1**: Fixed the installed `jukebox-infer` console script, which
+  previously failed on every install with "Error: quick_infer.py not
+  found"; removed a dead `apex` import remnant from the transformer code.
+- **v0.1.0**: Initial release — clean inference-only implementation
+  extracted from OpenAI Jukebox.
 
 ---
 
-## ✅ Parity Verification
+## What this project will NEVER bundle
 
-**jukebox-infer has been rigorously verified to produce 100% identical VQ-VAE features compared to the original OpenAI Jukebox.**
+Checkpoints (~6.2GB for `1b_lyrics`) are **never committed to this
+repository or bundled in the PyPI package.** They are downloaded on demand,
+directly from OpenAI's original checkpoint host
+(`https://openaipublic.azureedge.net/`), the first time you construct a
+`Jukebox` model or run the CLI without `--help`:
 
-### Test Results
+```bash
+# Option 1: Use the download script
+bash download_checkpoints.sh
 
-| Metric | Result |
-|--------|--------|
-| **max \|Δ\|** | 0.000000e+00 |
-| **mean \|Δ\|** | 0.000000e+00 |
-| **Feature shape** | (1, 6146) - identical |
-| **Feature range** | [8, 2035] - identical |
-| **Parity status** | ✅ **100% VERIFIED** |
-
-### What This Means
-
-- ✅ **Perfect numerical match** - Zero difference in VQ-VAE feature extraction
-- ✅ **Drop-in replacement** - Can completely replace original Jukebox for feature extraction
-- ✅ **No accuracy loss** - Maintains 100% fidelity to original implementation
-- ✅ **Research confidence** - Validated for academic and production use
-
-### Testing Methodology
-
-Parity was verified using:
-- Multiple audio durations (5s, 20s)
-- Identical official OpenAI checkpoints
-- Rigorous numerical comparison (rtol=1e-4, atol=1e-6)
-- Both CPU and GPU modes tested
-
-**For full details, see [PARITY_VERIFICATION.md](docs/PARITY_VERIFICATION.md)**
-
----
-
-## 🙏 Acknowledgments
-
-### Original Research by OpenAI
-
-**Jukebox-Infer** is built upon the groundbreaking work of [OpenAI Jukebox](https://github.com/openai/jukebox). The original Jukebox represents a major advancement in music generation, achieving state-of-the-art results through innovative hierarchical VQ-VAE and transformer architectures.
-
-### Research Paper
-
-**[Jukebox: A Generative Model for Music](https://arxiv.org/abs/2005.00341)**
-
-This seminal work introduced hierarchical music generation with conditioning on artist, genre, and lyrics, enabling high-quality music generation at multiple time scales.
-
-### Original Authors
-
-- Prafulla Dhariwal
-- Heewoo Jun
-- Christine Payne
-- Jong Wook Kim
-- Alec Radford
-- Ilya Sutskever
-
-### About This Implementation
-
-> **Note**: The original Jukebox repository is no longer actively maintained. This package was created to continue the excellent work by providing ongoing maintenance and PyTorch 2.13+ compatibility for the inference capabilities, while preserving 100% of the original model quality and algorithms.
-
-**What we maintain:**
-- PyTorch 2.13+ compatibility
-- Modern dependency management
-- Inference-only packaging
-- GPU optimization
-
-**What remains unchanged:**
-- All model architectures (100% original)
-- All generation algorithms (100% original)
-- All model weights (100% original)
-- VQ-VAE feature extraction (✅ **100% parity verified** - see [PARITY_VERIFICATION.md](docs/PARITY_VERIFICATION.md))
-
----
-
-## 📄 Citation
-
-Please cite using the following bibtex entry:
-
-```bibtex
-@article{dhariwal2020jukebox,
-  title={Jukebox: A Generative Model for Music},
-  author={Dhariwal, Prafulla and Jun, Heewoo and Payne, Christine and Kim, Jong Wook and Radford, Alec and Sutskever, Ilya},
-  journal={arXiv preprint arXiv:2005.00341},
-  year={2020}
-}
+# Option 2: Use Python API
+from jukebox_infer import download_checkpoints
+download_checkpoints('1b_lyrics')  # Downloads ~6.2GB
 ```
 
-**If you use Jukebox-Infer in your research, please cite the original Jukebox paper above.** This package is merely a maintenance fork to ensure continued compatibility with modern PyTorch versions - all credit for the models, algorithms, and research belongs to the original authors.
+Checkpoints are cached in `~/.cache/jukebox/models/`:
+- VQ-VAE (7.4MB) - shared encoder/decoder
+- Prior level 0 & 1 (4.4GB) - shared upsamplers
+- Prior level 2 (1.8GB) - 1b_lyrics top-level model
+
+This will not change: keeping multi-gigabyte weights out of the repo and
+out of the wheel is a permanent constraint, not a temporary limitation.
 
 ---
 
-## 📄 License
+## Limitations
+
+- **Inference only** - No training capabilities
+- **Single GPU** - No distributed inference
+- **Slow generation** - Autoregressive model, ~5-15 seconds per second of audio
+- **Minimum duration** - 1b_lyrics requires 17.84-600 seconds
+- **Large checkpoints** - ~6.2GB download required
+
+---
+
+## Development
+
+We welcome contributions! Please:
+
+1. Follow the code style (ruff/black)
+2. Add tests for new features
+3. Update documentation ([CLAUDE.md](CLAUDE.md) has the module layout and
+   file-header conventions)
+4. Submit PRs with clear descriptions
+
+```bash
+# Install dependencies with UV
+uv sync
+
+# Run the test suite (import/CLI/hparams smoke tests, no network/GPU/weights)
+uv run --with pytest python -m pytest -q
+
+# Checkpoint URL liveness (hits the network; deselected by default)
+uv run --with pytest python -m pytest -m network tests/test_weights_liveness.py -v
+
+# Run quick inference script
+uv run python quick_infer.py
+
+# Format and lint code
+uv run ruff format . && uv run ruff check .
+```
+
+See [CLAUDE.md](CLAUDE.md) for the full module layout, file-header
+convention, and verification commands.
+
+---
+
+## License
 
 **MIT License** (same as original Jukebox)
 
@@ -346,44 +389,7 @@ This project includes code adapted from [OpenAI Jukebox](https://github.com/open
 
 ---
 
-## ⚠️ Limitations
-
-- **Inference only** - No training capabilities
-- **Single GPU** - No distributed inference
-- **Slow generation** - Autoregressive model, ~5-15 seconds per second of audio
-- **Minimum duration** - 1b_lyrics requires 17.84-600 seconds
-- **Large checkpoints** - ~6.2GB download required
-
----
-
-## 🤝 Contributing
-
-We welcome contributions! Please:
-
-1. Read [docs/dev/PRINCIPLES.md](docs/dev/PRINCIPLES.md) for development guidelines
-2. Follow the code style (ruff/black)
-3. Add tests for new features
-4. Update documentation
-5. Submit PRs with clear descriptions
-
-### Development Setup
-
-```bash
-# Install dependencies with UV
-uv sync
-
-# Run quick inference script
-uv run python quick_infer.py
-
-# Format and lint code
-uv run ruff format . && uv run ruff check .
-```
-
-See [docs/dev/PRINCIPLES.md](docs/dev/PRINCIPLES.md) for detailed development guidelines.
-
----
-
-## 📞 Support
+## Support
 
 For issues and questions:
 - **GitHub Issues**: [github.com/openmirlab/jukebox-infer/issues](https://github.com/openmirlab/jukebox-infer/issues)
@@ -392,6 +398,4 @@ For issues and questions:
 
 ---
 
-**Made with ❤️ for the ML community**
-
-Based on the excellent work by OpenAI and the Jukebox authors.
+**Made with care for the ML community, on the shoulders of OpenAI and the Jukebox authors.**
