@@ -16,6 +16,11 @@ GPU support is load-bearing and untouched by any campaign in this repo:
 device selection (`--device cuda|cpu`, `Jukebox(device=...)`) flows straight
 through to `torch.device(...)` with no indirection added or removed.
 
+The package root uses lazy exports: importing metadata, hparams, or a
+SheetSage integration does not eagerly construct the API/audio stack. This is
+an import-cost optimization only; all documented root exports and standalone
+generation behavior remain available when accessed.
+
 ## Module layout
 
 - `jukebox_infer/api.py` -- the `Jukebox` class: `.load()` / `.generate()` /

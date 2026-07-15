@@ -12,6 +12,8 @@ Reads: jukebox_infer (package under test)
 """
 
 import importlib
+import subprocess
+import sys
 
 import pytest
 
@@ -35,6 +37,16 @@ def test_public_api_names_exported():
     assert hasattr(jukebox_infer, "Jukebox")
     assert hasattr(jukebox_infer, "set_seed")
     assert hasattr(jukebox_infer, "download_checkpoints")
+
+
+def test_package_import_defers_heavy_api_modules():
+    """Metadata/hparams imports must not eagerly import the API/audio stack."""
+    code = (
+        "import sys; import jukebox_infer; import jukebox_infer.hparams; "
+        "assert 'jukebox_infer.api' not in sys.modules; "
+        "assert 'jukebox_infer.make_models' not in sys.modules"
+    )
+    subprocess.run([sys.executable, "-c", code], check=True)
 
 
 @pytest.mark.parametrize(
