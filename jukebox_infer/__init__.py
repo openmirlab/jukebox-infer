@@ -10,7 +10,7 @@ Reads: jukebox_infer.api (Jukebox, set_seed), jukebox_infer.make_models
 """
 
 from jukebox_infer.__about__ import __version__
-from jukebox_infer.api import Jukebox, set_seed
+from jukebox_infer.api import Jukebox, JukeboxSession, set_seed
 from jukebox_infer.make_models import download_checkpoints
 
-__all__ = ["Jukebox", "download_checkpoints", "set_seed", "__version__"]
+__all__ = ["Jukebox", "JukeboxSession", "download_checkpoints", "set_seed", "__version__"]

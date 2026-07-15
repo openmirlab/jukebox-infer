@@ -69,6 +69,7 @@ include = [
     "jukebox_infer/**/*.py",
     "jukebox_infer/data/ids/*.txt",
     "jukebox_infer/data/*.json",
+    "jukebox_infer/config/*.toml",
 ]
 
 [tool.pytest.ini_options]

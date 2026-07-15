@@ -52,6 +52,8 @@ class Jukebox:
         self.device = device
         self.vqvae = None
         self.priors = None
+        self._closed = False
+        self._loaded = False
 
     def load(self, sample_length_in_seconds=20, n_samples=1, auto_download=True):
         """
@@ -62,6 +64,8 @@ class Jukebox:
             n_samples: Number of samples to generate in parallel
             auto_download: If True, automatically download missing checkpoints
         """
+        if self._closed:
+            raise RuntimeError("Jukebox session is closed; create a new session")
         hps = Hyperparams(
             sample_length_in_seconds=sample_length_in_seconds,
             total_sample_length_in_seconds=sample_length_in_seconds,
@@ -75,6 +79,8 @@ class Jukebox:
             print("Note: Missing checkpoints will be downloaded automatically.")
         self.vqvae, self.priors = make_model(self.model_name, self.device, hps, auto_download=auto_download)
         self.hps = hps
+        self._loaded = True
+        self._closed = False
         print("✓ Model loaded successfully")
 
     def generate(
@@ -159,6 +165,40 @@ class Jukebox:
 
         return audio
 
+    @property
+    def status(self):
+        if self._closed:
+            return "closed"
+        return "ready" if self._loaded and self.vqvae is not None else "new"
+
+    def release(self):
+        """Release live model objects while retaining the on-disk checkpoint cache."""
+        self.vqvae = None
+        self.priors = None
+        self._loaded = False
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+
+    def close(self):
+        self.release()
+        self._closed = True
+
+    def cache_info(self):
+        from jukebox_infer.config import checkpoint_cache_info
+        return checkpoint_cache_info(self.model_name)
+
+    def infer(self, *args, **kwargs):
+        if self.status != "ready":
+            raise RuntimeError("Jukebox session is not ready; call load() first")
+        return self.generate(*args, **kwargs)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc, tb):
+        self.close()
+
+
     def generate_from_audio(
         self,
         prompt_audio,
@@ -241,3 +281,6 @@ class Jukebox:
                 print(f"Saved to {output_path}/item_0.wav")
 
         return audio
+
+
+JukeboxSession = Jukebox

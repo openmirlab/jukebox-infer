@@ -399,3 +399,9 @@ For issues and questions:
 ---
 
 **Made with care for the ML community, on the shoulders of OpenAI and the Jukebox authors.**
+# Lifecycle API
+
+`JukeboxSession` is the explicit lifecycle facade. Call `load()` before
+`infer()`; `release()` drops live model memory while retaining the checkpoint
+cache, and `close()` permanently closes the session. The legacy `generate()`
+and `generate_from_audio()` methods remain available and lazy for compatibility.

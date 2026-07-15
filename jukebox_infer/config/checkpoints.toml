@@ -1,0 +1,24 @@
+# Package-owned runtime checkpoint catalog. Keep URLs and integrity metadata here.
+[models.vqvae]
+url = "https://openaipublic.azureedge.net/jukebox/models/5b/vqvae.pth.tar"
+sha256 = ""
+size_bytes = 7800000
+provenance = "OpenAI Jukebox release (Dhariwal et al., 2020)"
+
+[models.prior_1b_lyrics]
+url = "https://openaipublic.azureedge.net/jukebox/models/1b_lyrics/prior_level_2.pth.tar"
+sha256 = ""
+size_bytes = 1800000000
+provenance = "OpenAI Jukebox release (Dhariwal et al., 2020)"
+
+[models.prior_5b]
+url = "https://openaipublic.azureedge.net/jukebox/models/5b/prior_level_2.pth.tar"
+sha256 = ""
+size_bytes = 0
+provenance = "OpenAI Jukebox release (Dhariwal et al., 2020)"
+
+[models.prior_5b_lyrics]
+url = "https://openaipublic.azureedge.net/jukebox/models/5b_lyrics/prior_level_2.pth.tar"
+sha256 = ""
+size_bytes = 0
+provenance = "OpenAI Jukebox release (Dhariwal et al., 2020)"
