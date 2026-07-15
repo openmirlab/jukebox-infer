@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- Keep root exports and audio backends lazy so metadata and downstream
+  integrations avoid importing the full generation stack at startup; the
+  standalone `Jukebox` API and CLI contract are unchanged.
+
 ## CI matrix + dependency floor refresh (2026-07-12, branch `fix/ci-matrix`)
 
 An org audit found this repo tested only Python 3.10, and only inside

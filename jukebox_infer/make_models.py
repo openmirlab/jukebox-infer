@@ -20,7 +20,6 @@ from jukebox_infer.hparams import Hyperparams, setup_hparams, REMOTE_PREFIX
 from jukebox_infer.utils.remote_utils import download, check_file_exists
 from jukebox_infer.utils.torch_utils import freeze_model
 from jukebox_infer.utils.dist_utils import print_all
-from jukebox_infer.vqvae.vqvae import calculate_strides
 
 MODELS = {
     '5b': ("vqvae", "upsampler_level_0", "upsampler_level_1", "prior_5b"),
@@ -81,7 +80,10 @@ def restore_model(hps, model, checkpoint_path, auto_download=True):
         if 'step' in checkpoint: model.step = checkpoint['step']
 
 def make_vqvae(hps, device='cuda', auto_download=True):
-    from jukebox_infer.vqvae.vqvae import VQVAE
+    # Keep model architecture imports behind the factory boundary.  Consumers
+    # such as SheetSage can inspect hparams and checkpoint metadata without
+    # importing the full VQ-VAE graph first.
+    from jukebox_infer.vqvae.vqvae import VQVAE, calculate_strides
     block_kwargs = dict(width=hps.width, depth=hps.depth, m_conv=hps.m_conv,
                         dilation_growth_rate=hps.dilation_growth_rate,
                         dilation_cycle=hps.dilation_cycle,

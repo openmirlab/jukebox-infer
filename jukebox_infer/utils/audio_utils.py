@@ -1,8 +1,15 @@
+"""Audio loading, saving, and legacy spectral helpers for inference.
+
+Optional audio backends are imported inside file-I/O functions so metadata
+and model consumers do not pay the audio stack startup cost.
+
+Reads: torch, numpy, jukebox_infer.utils.dist_*; read by: jukebox_infer.api,
+jukebox_infer.vqvae.vqvae, jukebox_infer.sample
+"""
+
 import numpy as np
 import torch as t
 import jukebox_infer.utils.dist_adapter as dist
-import soundfile
-import librosa
 from jukebox_infer.utils.dist_utils import print_once
 
 class DefaultSTFTValues:
@@ -75,6 +82,8 @@ def log_magnitude_loss(x_in, x_out, hps, epsilon=1e-4):
     return t.mean(t.abs(spec_in - spec_out))
 
 def load_audio(file, sr, offset, duration, mono=False):
+    import librosa
+
     # Librosa loads more filetypes than soundfile
     x, _ = librosa.load(file, sr=sr, mono=mono, offset=offset/sr, duration=duration/sr)
     if len(x.shape) == 1:
@@ -83,9 +92,9 @@ def load_audio(file, sr, offset, duration, mono=False):
 
 
 def save_wav(fname, aud, sr):
+    import soundfile
+
     # clip before saving?
     aud = t.clamp(aud, -1, 1).cpu().numpy()
     for i in list(range(aud.shape[0])):
         soundfile.write(f'{fname}/item_{i}.wav', aud[i], samplerate=sr, format='wav')
-
-
