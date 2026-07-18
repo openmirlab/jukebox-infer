@@ -14,6 +14,23 @@ from jukebox_infer.sample import ancestral_sample, load_prompts, primed_sample
 from jukebox_infer.utils.audio_utils import load_audio, save_wav
 
 
+def resolve_device(device: Optional[str] = None) -> str:
+    """
+    Resolve a requested device string to a concrete "cuda"/"cpu" value.
+
+    Args:
+        device: "cuda", "cpu", "auto", or None. "auto" and None (unset) both
+            auto-detect: "cuda" if a GPU is available, otherwise "cpu".
+            Explicit "cuda"/"cpu" pass through unchanged.
+
+    Returns:
+        "cuda" or "cpu"
+    """
+    if device is None or device == "auto":
+        return "cuda" if torch.cuda.is_available() else "cpu"
+    return device
+
+
 def set_seed(seed: int) -> None:
     """
     Set all random seeds for reproducibility.
@@ -40,16 +57,18 @@ class Jukebox:
         >>> audio = model.generate(artist="The Beatles", genre="Rock", duration=20)
     """
 
-    def __init__(self, model_name="5b_lyrics", device="cuda"):
+    def __init__(self, model_name="5b_lyrics", device=None):
         """
         Initialize Jukebox model.
 
         Args:
             model_name: Model to use ("1b_lyrics", "5b", or "5b_lyrics")
-            device: Device to run on ("cuda" or "cpu")
+            device: Device to run on ("cuda", "cpu", or "auto"). Defaults to
+                None, which auto-detects the same way "auto" does: "cuda" if
+                available, otherwise "cpu".
         """
         self.model_name = model_name
-        self.device = device
+        self.device = resolve_device(device)
         self.vqvae = None
         self.priors = None
         self._closed = False
