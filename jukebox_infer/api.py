@@ -28,6 +28,17 @@ def resolve_device(device: Optional[str] = None) -> str:
     """
     if device is None or device == "auto":
         return "cuda" if torch.cuda.is_available() else "cpu"
+    if device == "cpu":
+        return "cpu"
+    if not isinstance(device, str) or not device.startswith("cuda"):
+        raise ValueError("device must be None, 'auto', 'cpu', 'cuda', or 'cuda:N'")
+    suffix = device[4:]
+    if suffix and (not suffix.startswith(":") or not suffix[1:].isdigit()):
+        raise ValueError("device must be None, 'auto', 'cpu', 'cuda', or 'cuda:N'")
+    if not torch.cuda.is_available():
+        raise RuntimeError(f"CUDA was explicitly requested ({device}) but is unavailable")
+    if suffix and int(suffix[1:]) >= torch.cuda.device_count():
+        raise RuntimeError(f"CUDA device index {suffix[1:]} is unavailable")
     return device
 
 
@@ -73,6 +84,7 @@ class Jukebox:
         self.priors = None
         self._closed = False
         self._loaded = False
+        self._load_args = None
 
     def load(self, sample_length_in_seconds=20, n_samples=1, auto_download=True):
         """
@@ -85,6 +97,11 @@ class Jukebox:
         """
         if self._closed:
             raise RuntimeError("Jukebox session is closed; create a new session")
+        args = (sample_length_in_seconds, n_samples, auto_download)
+        if self._loaded and self._load_args == args:
+            return self
+        if self._loaded:
+            raise RuntimeError("Jukebox is already loaded with different load options; release() first")
         hps = Hyperparams(
             sample_length_in_seconds=sample_length_in_seconds,
             total_sample_length_in_seconds=sample_length_in_seconds,
@@ -99,8 +116,9 @@ class Jukebox:
         self.vqvae, self.priors = make_model(self.model_name, self.device, hps, auto_download=auto_download)
         self.hps = hps
         self._loaded = True
-        self._closed = False
+        self._load_args = args
         print("✓ Model loaded successfully")
+        return self
 
     def generate(
         self,
@@ -192,27 +210,33 @@ class Jukebox:
 
     def release(self):
         """Release live model objects while retaining the on-disk checkpoint cache."""
+        if self._closed:
+            return
         self.vqvae = None
         self.priors = None
         self._loaded = False
+        self._load_args = None
         if torch.cuda.is_available():
             torch.cuda.empty_cache()
 
     def close(self):
-        self.release()
-        self._closed = True
+        if not self._closed:
+            self.release()
+            self._closed = True
 
     def cache_info(self):
         from jukebox_infer.config import checkpoint_cache_info
         return checkpoint_cache_info(self.model_name)
 
     def infer(self, *args, **kwargs):
+        if self._closed:
+            raise RuntimeError("Jukebox session is closed; create a new session")
         if self.status != "ready":
             raise RuntimeError("Jukebox session is not ready; call load() first")
         return self.generate(*args, **kwargs)
 
     def __enter__(self):
-        return self
+        return self.load()
 
     def __exit__(self, exc_type, exc, tb):
         self.close()

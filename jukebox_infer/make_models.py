@@ -8,8 +8,8 @@ from `~/.cache/jukebox/...`. `download_checkpoints()` is the standalone
 pre-download entry point exposed as `jukebox_infer.download_checkpoints`.
 No training code -- eval-mode + `freeze_model` are the only post-load steps.
 
-Reads: jukebox_infer.hparams (Hyperparams, setup_hparams, REMOTE_PREFIX),
-jukebox_infer.utils.remote_utils, jukebox_infer.vqvae.vqvae,
+Reads: jukebox_infer.config (TOML cache resolver), jukebox_infer.hparams
+(Hyperparams, setup_hparams, REMOTE_PREFIX), jukebox_infer.utils.remote_utils, jukebox_infer.vqvae.vqvae,
 jukebox_infer.prior.prior; read by: jukebox_infer.api, jukebox_infer.__init__
 """
 import os
@@ -20,6 +20,7 @@ from jukebox_infer.hparams import Hyperparams, setup_hparams, REMOTE_PREFIX
 from jukebox_infer.utils.remote_utils import download, check_file_exists
 from jukebox_infer.utils.torch_utils import freeze_model
 from jukebox_infer.utils.dist_utils import print_all
+from jukebox_infer import config as checkpoint_config
 
 MODELS = {
     '5b': ("vqvae", "upsampler_level_0", "upsampler_level_1", "prior_5b"),
@@ -39,7 +40,7 @@ def load_checkpoint(path, auto_download=True):
     restore = path
     if restore.startswith(REMOTE_PREFIX):
         remote_path = restore
-        local_path = os.path.join(os.path.expanduser("~/.cache"), remote_path[len(REMOTE_PREFIX):])
+        local_path = checkpoint_config.resolve_checkpoint_path(remote_path)
         
         # Check if file exists, download if missing
         if not check_file_exists(local_path):
@@ -210,7 +211,7 @@ def download_checkpoints(model_name, show_progress=True):
     # Download VQ-VAE
     if vqvae_hps.restore_vqvae.startswith(REMOTE_PREFIX):
         remote_path = vqvae_hps.restore_vqvae
-        local_path = os.path.join(os.path.expanduser("~/.cache"), remote_path[len(REMOTE_PREFIX):])
+        local_path = checkpoint_config.resolve_checkpoint_path(remote_path)
         try:
             download(remote_path, local_path, show_progress=show_progress)
             results['vqvae'] = 'downloaded'
@@ -222,7 +223,7 @@ def download_checkpoints(model_name, show_progress=True):
     for i, prior_hps in enumerate(prior_hps_list):
         if prior_hps.restore_prior.startswith(REMOTE_PREFIX):
             remote_path = prior_hps.restore_prior
-            local_path = os.path.join(os.path.expanduser("~/.cache"), remote_path[len(REMOTE_PREFIX):])
+            local_path = checkpoint_config.resolve_checkpoint_path(remote_path)
             try:
                 download(remote_path, local_path, show_progress=show_progress)
                 results[f'prior_level_{i}'] = 'downloaded'

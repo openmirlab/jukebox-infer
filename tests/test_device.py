@@ -37,10 +37,6 @@ def test_resolve_device_passes_through_explicit_values_unchanged():
         assert resolve_device("cpu") == "cpu"
         assert resolve_device("cuda") == "cuda"
     with patch("torch.cuda.is_available", return_value=False):
-        # Explicit "cuda" is a deliberate caller choice and is not
-        # second-guessed even without a GPU -- only the unset/"auto" case
-        # auto-detects.
-        assert resolve_device("cuda") == "cuda"
         assert resolve_device("cpu") == "cpu"
 
 
@@ -66,7 +62,9 @@ def test_jukebox_explicit_device_passes_through_unchanged():
     with patch("torch.cuda.is_available", return_value=True):
         assert Jukebox(device="cpu").device == "cpu"
     with patch("torch.cuda.is_available", return_value=False):
-        assert Jukebox(device="cuda").device == "cuda"
+        import pytest
+        with pytest.raises(RuntimeError):
+            Jukebox(device="cuda")
 
 
 def test_quick_infer_device_cli_choices_include_auto_and_default_to_it():

@@ -403,5 +403,11 @@ For issues and questions:
 
 `JukeboxSession` is the explicit lifecycle facade. Call `load()` before
 `infer()`; `release()` drops live model memory while retaining the checkpoint
-cache, and `close()` permanently closes the session. The legacy `generate()`
-and `generate_from_audio()` methods remain available and lazy for compatibility.
+cache, and `close()` permanently closes the session. `load()` is idempotent
+for the same options, and `cache_info()` inspects the same checkpoint paths
+without downloading them. Devices accept `cpu`, `cuda`, or `cuda:N`; explicit
+CUDA requests fail early when unavailable. The legacy `generate()` and
+`generate_from_audio()` methods remain available and lazy for compatibility.
+
+Checkpoint URLs and cache paths are owned at runtime by the packaged
+`jukebox_infer/config/checkpoints.toml`; the package never bundles weights.

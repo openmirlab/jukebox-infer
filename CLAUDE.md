@@ -12,9 +12,9 @@ is exercised by any documented workflow today; `5b`/`5b_lyrics` entries exist
 in `hparams.py`'s registry but are unused/untested. See README.md for the
 public API, CLI usage, and model table.
 
-GPU support is load-bearing and untouched by any campaign in this repo:
-device selection (`--device cuda|cpu`, `Jukebox(device=...)`) flows straight
-through to `torch.device(...)` with no indirection added or removed.
+GPU support is load-bearing: `Jukebox(device=...)` accepts `cpu`, `cuda`, and
+`cuda:N`, validates explicit CUDA availability/indexes, and forwards the
+resolved value through construction and sampling unchanged.
 
 The package root uses lazy exports: importing metadata, hparams, or a
 SheetSage integration does not eagerly construct the API/audio stack. This is
@@ -40,6 +40,9 @@ generation behavior remain available when accessed.
   the VQ-VAE and each prior level, including each entry's checkpoint URL
   (`restore_vqvae` / `restore_prior`, all under
   `https://openaipublic.azureedge.net/`).
+- `jukebox_infer/config/checkpoints.toml` -- the production catalog for every
+  official runtime URL and its cache-path resolver. Unknown upstream hashes
+  are recorded as `integrity = "unavailable"`; JSON is parity-only.
 - `jukebox_infer/data/checkpoints.json` -- provenance registry (url / approx
   size / shared-by) mirroring the URLs embedded in hparams.py, consulted by
   `tools/check_weights_liveness.py`. No sha256 is recorded: computing one

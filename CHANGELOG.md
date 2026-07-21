@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- Repaired device and lifecycle contracts: explicit `cpu`/`cuda`/`cuda:N`
+  validation, idempotent loading, release/reload, terminal close, and
+  ready-only `infer()` while preserving legacy `Jukebox.generate()` use.
+- Made `config/checkpoints.toml` the sole production checkpoint catalog for
+  model loading, downloading, and cache inspection; legacy JSON is retained
+  only as a source parity fixture and excluded from wheels.
 - Keep root exports and audio backends lazy so metadata and downstream
   integrations avoid importing the full generation stack at startup; the
   standalone `Jukebox` API and CLI contract are unchanged.

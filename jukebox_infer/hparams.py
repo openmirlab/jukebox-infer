@@ -3,20 +3,21 @@
 `setup_hparams(name_or_names, kwargs)` composes one or more named entries
 from `HPARAMS_REGISTRY` (e.g. `"vqvae,1b_lyrics_prior,1b_lyrics"`) into a
 single `Hyperparams` dict, consumed by `make_models.make_vqvae` /
-`make_prior`. `REMOTE_PREFIX` + each entry's `restore_vqvae`/`restore_prior`
-is where the OpenAI Azure checkpoint URLs live (see
-jukebox_infer/data/checkpoints.json for the provenance-tracked version of
-this same list). Model architecture hparams (widths, depths, strides, ...)
+`make_prior`. Each entry's `restore_vqvae`/`restore_prior` URL comes from the
+packaged TOML checkpoint catalog; the JSON registry is source-only parity
+data. Model architecture hparams (widths, depths, strides, ...)
 are untouched from the original Jukebox training code -- this file only
 governs which checkpoint loads and how inference is configured, not the
 model math itself.
 
-Reads: (leaf module, no local imports); read by: jukebox_infer.make_models,
-jukebox_infer.api, jukebox_infer/data/checkpoints.json (URL cross-reference)
+Reads: config.checkpoint_url; read by: jukebox_infer.make_models,
+jukebox_infer.api, jukebox_infer/data/checkpoints.json (URL parity fixture)
 """
 
 HPARAMS_REGISTRY = {}
 DEFAULTS = {}
+
+from jukebox_infer.config import checkpoint_url
 
 class Hyperparams(dict):
     def __getattr__(self, attr):
@@ -71,7 +72,7 @@ vqvae = Hyperparams(
     depth = 4,
     m_conv = 1.0,
     dilation_growth_rate = 3,
-    restore_vqvae=REMOTE_PREFIX + 'jukebox/models/5b/vqvae.pth.tar',
+    restore_vqvae=checkpoint_url("vqvae"),
 )
 HPARAMS_REGISTRY["vqvae"] = vqvae
 
@@ -104,7 +105,7 @@ upsamplers.update(labels)
 
 upsampler_level_0 = Hyperparams(
     level=0,
-    restore_prior=REMOTE_PREFIX + 'jukebox/models/5b/prior_level_0.pth.tar'
+    restore_prior=checkpoint_url("upsampler_level_0")
 )
 upsampler_level_0.update(upsamplers)
 HPARAMS_REGISTRY["upsampler_level_0"] = upsampler_level_0
@@ -112,7 +113,7 @@ HPARAMS_REGISTRY["upsampler_level_0"] = upsampler_level_0
 upsampler_level_1 = Hyperparams(
     level=1,
     cond_res_scale=True,
-    restore_prior=REMOTE_PREFIX + 'jukebox/models/5b/prior_level_1.pth.tar'
+    restore_prior=checkpoint_url("upsampler_level_1")
 )
 upsampler_level_1.update(upsamplers)
 HPARAMS_REGISTRY["upsampler_level_1"] = upsampler_level_1
@@ -134,7 +135,7 @@ prior_5b = Hyperparams(
     n_tokens=0,
     prime_loss_fraction=0.0,
     merged_decoder=True,
-    restore_prior=REMOTE_PREFIX + 'jukebox/models/5b/prior_level_2.pth.tar',
+    restore_prior=checkpoint_url("prior_5b"),
     fp16_params=True,
 )
 prior_5b.update(labels)
@@ -164,7 +165,7 @@ prior_5b_lyrics = Hyperparams(
     n_tokens=512,
     prime_loss_fraction=0.4,
     merged_decoder=True,
-    restore_prior=REMOTE_PREFIX + 'jukebox/models/5b_lyrics/prior_level_2.pth.tar',
+    restore_prior=checkpoint_url("prior_5b_lyrics"),
     fp16_params=True,
     alignment_layer=68,
     alignment_head=2,
@@ -196,7 +197,7 @@ prior_1b_lyrics = Hyperparams(
     n_tokens=384,
     prime_loss_fraction=0.4,
     single_enc_dec=True,
-    restore_prior=REMOTE_PREFIX + 'jukebox/models/1b_lyrics/prior_level_2.pth.tar',
+    restore_prior=checkpoint_url("prior_1b_lyrics"),
     fp16_params=False,
     alignment_layer=63,
     alignment_head=0,
