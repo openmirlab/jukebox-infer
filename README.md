@@ -24,7 +24,7 @@ model construction, and ancestral/primed sampling — as a small,
 single-GPU-only package that installs cleanly on PyTorch 2.13+ with no MPI or
 `apex` dependency (~47% smaller codebase than upstream). All model
 architectures, generation algorithms, and weights are unchanged from the
-original; see [Parity Verification](docs/PARITY_VERIFICATION.md) for a
+original; see `docs/PARITY_VERIFICATION.md` (local-only, not on GitHub) for a
 rigorous numerical proof that the VQ-VAE feature extraction is bit-identical
 to upstream.
 
@@ -71,7 +71,7 @@ paper — this package is a maintenance fork, not new research:
 
 ## Features
 
-- **100% Parity Verified** - VQ-VAE features identical to original Jukebox (see [Parity Verification](docs/PARITY_VERIFICATION.md))
+- **100% Parity Verified** - VQ-VAE features identical to original Jukebox (see `docs/PARITY_VERIFICATION.md`, local-only, not on GitHub)
 - **Inference-only** - No training code, significantly reduced codebase (~47% reduction)
 - **Modern PyTorch** - Compatible with PyTorch 2.13+
 - **Single-GPU** - No MPI or distributed dependencies
@@ -264,7 +264,7 @@ Parity was verified using:
 - Rigorous numerical comparison (rtol=1e-4, atol=1e-6)
 - Both CPU and GPU modes tested
 
-**For full details, see [PARITY_VERIFICATION.md](docs/PARITY_VERIFICATION.md)**
+**For full details, see `docs/PARITY_VERIFICATION.md` (local-only, not on GitHub)**
 
 ## Project Structure
 

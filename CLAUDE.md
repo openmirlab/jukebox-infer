@@ -1,5 +1,8 @@
 # jukebox-infer -- CLAUDE.md
 
+**`docs/`** is local-only by policy (2026-09-14): kept on disk, gitignored,
+never pushed to GitHub.
+
 ## Scope
 
 jukebox-infer is an inference-only repackaging of [OpenAI Jukebox](https://github.com/openai/jukebox)
