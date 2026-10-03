@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- Report failed checkpoint loads and released sessions through `status` while
+  keeping failed loads retryable.
 - Repaired device and lifecycle contracts: explicit `cpu`/`cuda`/`cuda:N`
   validation, idempotent loading, release/reload, terminal close, and
   ready-only `infer()` while preserving legacy `Jukebox.generate()` use.

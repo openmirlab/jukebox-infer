@@ -19,6 +19,13 @@ GPU support is load-bearing: `Jukebox(device=...)` accepts `cpu`, `cuda`, and
 `cuda:N`, validates explicit CUDA availability/indexes, and forwards the
 resolved value through construction and sampling unchanged.
 
+`JukeboxSession` is an alias of `Jukebox`. Its `status` distinguishes `new`,
+`ready`, `failed`, `released`, and `closed`: a failed or interrupted `load()`
+preserves its exception and can be retried; `release()` drops live models and
+permits a later `load()`; `close()` is terminal. The offline lifecycle tests
+exercise these transitions with a stub model builder so they never fetch the
+multi-GB checkpoints.
+
 The package root uses lazy exports: importing metadata, hparams, or a
 SheetSage integration does not eagerly construct the API/audio stack. This is
 an import-cost optimization only; all documented root exports and standalone
@@ -26,7 +33,8 @@ generation behavior remain available when accessed.
 
 ## Module layout
 
-- `jukebox_infer/api.py` -- the `Jukebox` class: `.load()` / `.generate()` /
+- `jukebox_infer/api.py` -- the `Jukebox` class and its `JukeboxSession` alias:
+  `.load()` / `.infer()` / `.release()` / `.close()` / `.generate()` /
   `.generate_from_audio()`, the only integration point most callers need.
 - `jukebox_infer/quick_infer.py` -- CLI argument parsing + the ancestral/
   continuation drive loop. Backs both the installed `jukebox-infer` console

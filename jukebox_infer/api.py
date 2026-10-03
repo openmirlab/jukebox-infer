@@ -1,5 +1,10 @@
-"""
-Simple API for Jukebox inference.
+"""Public lifecycle and generation facade for Jukebox inference.
+
+This module owns session state and translates a requested device into the
+backend's concrete placement before model construction or sampling.
+Reads: os, numpy, torch, jukebox_infer.hparams, jukebox_infer.make_models,
+jukebox_infer.sample, jukebox_infer.utils.audio_utils; read by:
+jukebox_infer.__init__, tests/test_lifecycle_contract.py.
 """
 
 import os
@@ -84,6 +89,8 @@ class Jukebox:
         self.priors = None
         self._closed = False
         self._loaded = False
+        self._failed = False
+        self._released = False
         self._load_args = None
 
     def load(self, sample_length_in_seconds=20, n_samples=1, auto_download=True):
@@ -113,9 +120,15 @@ class Jukebox:
         print(f"Loading {self.model_name}...")
         if auto_download:
             print("Note: Missing checkpoints will be downloaded automatically.")
-        self.vqvae, self.priors = make_model(self.model_name, self.device, hps, auto_download=auto_download)
+        try:
+            self.vqvae, self.priors = make_model(self.model_name, self.device, hps, auto_download=auto_download)
+        except BaseException:
+            self._failed = True
+            raise
         self.hps = hps
         self._loaded = True
+        self._failed = False
+        self._released = False
         self._load_args = args
         print("✓ Model loaded successfully")
         return self
@@ -206,7 +219,13 @@ class Jukebox:
     def status(self):
         if self._closed:
             return "closed"
-        return "ready" if self._loaded and self.vqvae is not None else "new"
+        if self._loaded and self.vqvae is not None:
+            return "ready"
+        if self._failed:
+            return "failed"
+        if self._released:
+            return "released"
+        return "new"
 
     def release(self):
         """Release live model objects while retaining the on-disk checkpoint cache."""
@@ -215,6 +234,8 @@ class Jukebox:
         self.vqvae = None
         self.priors = None
         self._loaded = False
+        self._failed = False
+        self._released = True
         self._load_args = None
         if torch.cuda.is_available():
             torch.cuda.empty_cache()

@@ -409,5 +409,9 @@ without downloading them. Devices accept `cpu`, `cuda`, or `cuda:N`; explicit
 CUDA requests fail early when unavailable. The legacy `generate()` and
 `generate_from_audio()` methods remain available and lazy for compatibility.
 
+`status` reports `new`, `ready`, `failed`, `released`, or `closed`. A failed
+`load()` keeps the original exception and may be retried; `release()` reports
+`released` until the next successful load.
+
 Checkpoint URLs and cache paths are owned at runtime by the packaged
 `jukebox_infer/config/checkpoints.toml`; the package never bundles weights.
