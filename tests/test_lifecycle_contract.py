@@ -48,8 +48,45 @@ def test_load_is_idempotent_and_reloads_only_after_release(monkeypatch):
     with pytest.raises(RuntimeError, match="different load options"):
         session.load(sample_length_in_seconds=30, auto_download=False)
     session.release()
+    assert session.status == "released"
     session.load(auto_download=False)
     assert len(calls) == 2
+    assert session.status == "ready"
+
+
+def test_failed_load_is_observable_and_retryable(monkeypatch):
+    calls = 0
+
+    def make_model_after_retry(*args, **kwargs):
+        nonlocal calls
+        calls += 1
+        if calls == 1:
+            raise OSError("checkpoint unavailable")
+        return object(), []
+
+    monkeypatch.setattr(api, "make_model", make_model_after_retry)
+    session = Jukebox("1b_lyrics", device="cpu")
+    with pytest.raises(OSError, match="checkpoint unavailable"):
+        session.load(auto_download=False)
+    assert session.status == "failed"
+    with pytest.raises(RuntimeError, match="not ready"):
+        session.infer()
+    assert session.load(auto_download=False) is session
+    assert session.status == "ready"
+    assert calls == 2
+
+
+def test_interrupted_load_is_failed_until_release(monkeypatch):
+    def interrupted_model(*args, **kwargs):
+        raise KeyboardInterrupt
+
+    monkeypatch.setattr(api, "make_model", interrupted_model)
+    session = Jukebox("1b_lyrics", device="cpu")
+    with pytest.raises(KeyboardInterrupt):
+        session.load(auto_download=False)
+    assert session.status == "failed"
+    session.release()
+    assert session.status == "released"
 
 
 def test_infer_is_ready_only_and_close_is_terminal(monkeypatch):
