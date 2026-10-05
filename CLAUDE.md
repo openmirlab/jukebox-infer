@@ -110,3 +110,7 @@ python tools/check_weights_liveness.py
 Real generation (`jukebox-infer` without `--help`, or `Jukebox.generate(...)`)
 requires downloading ~6.2GB of checkpoints and a CUDA GPU with 16GB+ VRAM --
 not exercised by CI or by routine maintenance passes on this repo.
+
+## Distribution policy (2026-10-05)
+
+Install the current source from `https://github.com/openmirlab/jukebox-infer`. GitHub release workflows verify and build distributions but do not upload to PyPI. Existing PyPI versions, where any exist, are historical snapshots. Update installation examples to use Git when changing this package.
