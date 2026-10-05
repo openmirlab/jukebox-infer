@@ -1,8 +1,10 @@
 # Jukebox-Infer
 
+> **Current installation:** `pip install "jukebox-infer @ git+https://github.com/openmirlab/jukebox-infer.git"`
+> OpenMIRLab no longer publishes new versions to PyPI. Any existing PyPI releases are historical snapshots.
+
 **Inference-only implementation of OpenAI Jukebox for modern PyTorch (2.13+)**
 
-[![PyPI](https://img.shields.io/pypi/v/jukebox-infer)](https://pypi.org/project/jukebox-infer/)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.13+-red.svg)](https://pytorch.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -110,14 +112,14 @@ paper — this package is a maintenance fork, not new research:
 
 ## Install
 
-**From PyPI:**
+**From GitHub:**
 
 ```bash
 # Using pip
-pip install jukebox-infer
+pip install "jukebox-infer @ git+https://github.com/openmirlab/jukebox-infer.git"
 
 # Using uv (recommended - faster)
-uv pip install jukebox-infer
+uv pip install "jukebox-infer @ git+https://github.com/openmirlab/jukebox-infer.git"
 
 # Or add to your project with uv
 uv add jukebox-infer
