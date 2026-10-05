@@ -139,7 +139,6 @@ uv pip install -e .
 
 > **Package:** https://pypi.org/project/jukebox-infer/
 >
-> **Note:** If you're setting up both the original Jukebox and jukebox-infer for comparison testing, see [../JUKEBOX_SETUP.md](../JUKEBOX_SETUP.md) for detailed environment setup instructions.
 
 ---
 
