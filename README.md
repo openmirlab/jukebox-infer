@@ -122,7 +122,7 @@ pip install "jukebox-infer @ git+https://github.com/openmirlab/jukebox-infer.git
 uv pip install "jukebox-infer @ git+https://github.com/openmirlab/jukebox-infer.git"
 
 # Or add to your project with uv
-uv add jukebox-infer
+uv add "jukebox-infer @ git+https://github.com/openmirlab/jukebox-infer.git"
 ```
 
 **For Development:**
@@ -139,7 +139,7 @@ pip install -e .
 uv pip install -e .
 ```
 
-> **Package:** https://pypi.org/project/jukebox-infer/
+> **Current source:** https://github.com/openmirlab/jukebox-infer
 >
 
 ---
